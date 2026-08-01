@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bhoopali · Practice</title>
+<meta name="description" content="Segment practice player for Raga Bhoopali flute meditation, Pt. Hariprasad Chaurasia">
+<meta name="theme-color" content="#1B1330">
+<link rel="manifest" href="app.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#1B1330;
+    --bg-panel:#241A3D;
+    --bg-panel-raised:#2C2049;
+    --brass:#C9A15C;
+    --brass-dim:#8B7444;
+    --bamboo:#7C8F6E;
+    --ivory:#F1E9D8;
+    --muted:#A79BC4;
+    --rose:#B5654F;
+    --line: rgba(241,233,216,0.10);
+    --radius: 14px;
+    --font-display: 'Fraunces', serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, #2E2151 0%, transparent 60%),
+      var(--bg-deep);
+    color:var(--ivory);
+    font-family:var(--font-body);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  .wrap{
+    max-width:560px;
+    margin:0 auto;
+    padding:28px 18px 60px;
+  }
+
+  /* ---------- Header ---------- */
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--brass);
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:clamp(28px,7vw,38px);
+    line-height:1.05;
+    margin:0 0 6px;
+    color:var(--ivory);
+    font-optical-sizing:auto;
+  }
+  .subtitle{
+    color:var(--muted);
+    font-size:14.5px;
+    margin:0 0 26px;
+  }
+
+  /* ---------- Overall progress rail ---------- */
+  .rail{
+    position:relative;
+    height:6px;
+    border-radius:99px;
+    background:var(--bg-panel-raised);
+    margin:0 0 8px;
+    overflow:hidden;
+  }
+  .rail-fill{
+    position:absolute; inset:0 auto 0 0;
+    background:linear-gradient(90deg, var(--bamboo), var(--brass));
+    border-radius:99px;
+    width:0%;
+    transition:width .25s ease;
+  }
+  .rail-caption{
+    display:flex; justify-content:space-between;
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    color:var(--muted);
+    margin:0 0 28px;
+  }
+
+  /* ---------- Player card ---------- */
+  .player{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:24px 20px 22px;
+    margin-bottom:20px;
+  }
+  .part-label{
+    text-align:center;
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.1em;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin-bottom:2px;
+  }
+  .part-time-range{
+    text-align:center;
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--brass);
+    margin-bottom:14px;
+  }
+  .big-time{
+    text-align:center;
+    font-family:var(--font-mono);
+    font-weight:500;
+    font-size:clamp(44px,13vw,58px);
+    letter-spacing:.01em;
+    line-height:1;
+    margin-bottom:6px;
+    font-variant-numeric:tabular-nums;
+  }
+  .seg-rail{
+    position:relative;
+    height:5px;
+    border-radius:99px;
+    background:var(--bg-panel-raised);
+    margin:0 6px 26px;
+    overflow:hidden;
+  }
+  .seg-rail-fill{
+    position:absolute; inset:0 auto 0 0;
+    background:var(--rose);
+    width:0%;
+  }
+
+  .controls-main{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    margin-bottom:20px;
+  }
+  .btn-round{
+    background:var(--bg-panel-raised);
+    border:1px solid var(--line);
+    color:var(--ivory);
+    border-radius:50%;
+    width:48px; height:48px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+  }
+  .btn-round:hover{background:#33285a;}
+  .btn-round:active{transform:scale(.94);}
+  .btn-round svg{width:20px;height:20px;}
+  .btn-play{
+    width:66px; height:66px;
+    background:linear-gradient(160deg, var(--brass), var(--brass-dim));
+    color:#1B1330;
+    box-shadow:0 6px 20px -6px rgba(201,161,92,.55);
+  }
+  .btn-play:hover{filter:brightness(1.06);}
+  .btn-play svg{width:26px;height:26px;}
+
+  .controls-sub{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .pill{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--muted);
+    background:var(--bg-panel-raised);
+    border:1px solid var(--line);
+    border-radius:99px;
+    padding:7px 13px;
+    cursor:pointer;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .pill.active{
+    color:var(--bg-deep);
+    background:var(--bamboo);
+    border-color:var(--bamboo);
+    font-weight:600;
+  }
+  .pill:focus-visible, .btn-round:focus-visible, button:focus-visible, .part-row:focus-visible{
+    outline:2px solid var(--brass);
+    outline-offset:2px;
+  }
+
+  /* ---------- Bead mala (rep tracker) ---------- */
+  .mala-wrap{
+    margin-top:24px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+  }
+  .mala-caption{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:12px;
+  }
+  .mala-caption .label{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .mala-caption .count{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--brass);
+  }
+  .mala{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    flex-wrap:wrap;
+  }
+  .bead{
+    width:16px; height:16px;
+    border-radius:50%;
+    background:var(--bg-panel-raised);
+    border:1.5px solid var(--line);
+    transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .bead.guru{
+    width:20px; height:20px;
+    border-color:rgba(181,101,79,.4);
+  }
+  .bead.filled{
+    background:linear-gradient(155deg, var(--brass), var(--brass-dim));
+    border-color:var(--brass);
+    box-shadow:0 0 0 3px rgba(201,161,92,.14);
+  }
+  .bead.guru.filled{
+    background:linear-gradient(155deg, var(--rose), #8f4a37);
+    border-color:var(--rose);
+    box-shadow:0 0 0 3px rgba(181,101,79,.16);
+  }
+  .strand-note{
+    font-size:12px;
+    color:var(--muted);
+    margin-top:10px;
+    line-height:1.5;
+  }
+
+  /* ---------- Parts list ---------- */
+  .section-title{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin:32px 0 12px 4px;
+  }
+  .parts-list{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    overflow:hidden;
+  }
+  .part-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    width:100%;
+    background:none;
+    border:none;
+    border-bottom:1px solid var(--line);
+    color:var(--ivory);
+    padding:12px 16px;
+    text-align:left;
+    font-family:var(--font-body);
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .part-row:last-child{border-bottom:none;}
+  .part-row:hover{background:rgba(241,233,216,0.03);}
+  .part-row.current{background:rgba(201,161,92,0.09);}
+  .part-num{
+    font-family:var(--font-mono);
+    font-size:12px;
+    color:var(--muted);
+    width:20px;
+    flex-shrink:0;
+  }
+  .part-row.current .part-num{color:var(--brass);}
+  .part-bar-wrap{
+    flex:1;
+    min-width:0;
+  }
+  .part-row-top{
+    display:flex; justify-content:space-between;
+    font-size:13.5px;
+    margin-bottom:5px;
+  }
+  .part-row-time{
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--muted);
+  }
+  .part-mini-bar{
+    height:3px;
+    background:var(--bg-panel-raised);
+    border-radius:99px;
+    overflow:hidden;
+  }
+  .part-mini-bar-fill{
+    height:100%;
+    background:var(--bamboo);
+    width:0%;
+  }
+  .part-check{
+    flex-shrink:0;
+    width:16px; height:16px;
+    color:var(--brass);
+  }
+  .part-check svg{display:none;width:16px;height:16px;}
+  .part-row.done .part-check svg{display:block;}
+
+  /* ---------- History ---------- */
+  .history{
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:18px 18px 16px;
+    margin-top:20px;
+  }
+  .history-caption{
+    display:flex; justify-content:space-between;
+    font-family:var(--font-mono);
+    font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:14px;
+  }
+  .spark{
+    display:flex;
+    align-items:flex-end;
+    gap:4px;
+    height:44px;
+  }
+  .spark-bar{
+    flex:1;
+    background:var(--bg-panel-raised);
+    border-radius:2px 2px 0 0;
+    min-height:3px;
+    position:relative;
+  }
+  .spark-bar.has-data{background:var(--bamboo);}
+  .spark-bar.today{background:var(--brass);}
+  .spark-labels{
+    display:flex; justify-content:space-between;
+    font-family:var(--font-mono);
+    font-size:9.5px;
+    color:var(--muted);
+    margin-top:6px;
+  }
+
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:11.5px;
+    margin-top:32px;
+    font-family:var(--font-mono);
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none !important; animation:none !important;}
+  }
+
+  .sr-only{
+    position:absolute; width:1px; height:1px;
+    padding:0; margin:-1px; overflow:hidden;
+    clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Raga Bhoopali · Segment practice</p>
+  <h1>Flute Meditation</h1>
+  <p class="subtitle">Pt. Hariprasad Chaurasia — 27 parts, split at natural pauses</p>
+
+  <div class="rail" aria-hidden="true"><div class="rail-fill" id="railFill"></div></div>
+  <div class="rail-caption">
+    <span id="railPos">0:00</span>
+    <span id="railTotal">10:35</span>
+  </div>
+
+  <div class="player">
+    <p class="part-label" id="partLabel">Part 1 of 27</p>
+    <p class="part-time-range" id="partTimeRange">0:00 – 0:25</p>
+    <div class="big-time" id="bigTime">0:00</div>
+    <div class="seg-rail" aria-hidden="true"><div class="seg-rail-fill" id="segRailFill"></div></div>
+
+    <div class="controls-main">
+      <button class="btn-round" id="prevBtn" aria-label="Previous part">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+      </button>
+      <button class="btn-round" id="backBtn" aria-label="Back 5 seconds">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+      </button>
+      <button class="btn-round btn-play" id="playBtn" aria-label="Play">
+        <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+      </button>
+      <button class="btn-round" id="fwdBtn" aria-label="Forward 5 seconds">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+      </button>
+      <button class="btn-round" id="nextBtn" aria-label="Next part">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+      </button>
+    </div>
+
+    <div class="controls-sub" role="group" aria-label="Loop and speed">
+      <button class="pill active" id="loopToggle">↺ Loop part</button>
+      <button class="pill" data-rate="0.75">0.75×</button>
+      <button class="pill" data-rate="0.85">0.85×</button>
+      <button class="pill active" data-rate="1">1×</button>
+      <button class="pill" data-rate="1.15">1.15×</button>
+    </div>
+
+    <div class="mala-wrap">
+      <div class="mala-caption">
+        <span class="label">Reps on this part</span>
+        <span class="count" id="malaCount">0 reps</span>
+      </div>
+      <div class="mala" id="mala"></div>
+      <p class="strand-note">Bhoopali is built from five notes — Sa Re Ga Pa Dha. Each strand of five beads is one pass through the loop; the rose bead marks a completed strand.</p>
+    </div>
+  </div>
+
+  <p class="section-title">All parts</p>
+  <div class="parts-list" id="partsList"></div>
+
+  <div class="history">
+    <div class="history-caption">
+      <span>Last 14 days</span>
+      <span id="todayReps">0 reps today</span>
+    </div>
+    <div class="spark" id="spark"></div>
+    <div class="spark-labels" id="sparkLabels"></div>
+  </div>
+
+  <footer>Loops automatically · reps count on each pass</footer>
+</div>
+
+<audio id="audio" src="bhoopali.mp3" preload="metadata"></audio>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'bhoopali-practice-v1';
+  const audio = document.getElementById('audio');
+  let manifest = null;
+  let segments = [];
+  let currentIndex = 0;
+  let looping = true;
+  let rate = 1;
+  let state = loadState();
+
+  const els = {
+    partLabel: document.getElementById('partLabel'),
+    partTimeRange: document.getElementById('partTimeRange'),
+    bigTime: document.getElementById('bigTime'),
+    segRailFill: document.getElementById('segRailFill'),
+    railFill: document.getElementById('railFill'),
+    railPos: document.getElementById('railPos'),
+    railTotal: document.getElementById('railTotal'),
+    playBtn: document.getElementById('playBtn'),
+    playIcon: document.getElementById('playIcon'),
+    pauseIcon: document.getElementById('pauseIcon'),
+    prevBtn: document.getElementById('prevBtn'),
+    nextBtn: document.getElementById('nextBtn'),
+    backBtn: document.getElementById('backBtn'),
+    fwdBtn: document.getElementById('fwdBtn'),
+    loopToggle: document.getElementById('loopToggle'),
+    mala: document.getElementById('mala'),
+    malaCount: document.getElementById('malaCount'),
+    partsList: document.getElementById('partsList'),
+    spark: document.getElementById('spark'),
+    sparkLabels: document.getElementById('sparkLabels'),
+    todayReps: document.getElementById('todayReps'),
+  };
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return { repsBySegment:{}, history:{} };
+  }
+  function saveState(){
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+  function todayKey(){
+    const d = new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function fmt(t){
+    t = Math.max(0, t);
+    const m = Math.floor(t/60);
+    const s = Math.floor(t%60);
+    return m+':'+String(s).padStart(2,'0');
+  }
+
+  fetch('segments.json').then(r=>r.json()).then(data=>{
+    manifest = data;
+    segments = data.segments;
+    els.railTotal.textContent = fmt(data.totalDuration);
+    buildPartsList();
+    goToSegment(0, false);
+    renderHistory();
+  }).catch(err=>{
+    els.partLabel.textContent = 'Could not load segments.json';
+  });
+
+  function buildPartsList(){
+    els.partsList.innerHTML = '';
+    segments.forEach((seg, i)=>{
+      const row = document.createElement('button');
+      row.className = 'part-row';
+      row.setAttribute('role','listitem');
+      row.dataset.index = i;
+      row.innerHTML = `
+        <span class="part-num">${String(seg.id).padStart(2,'0')}</span>
+        <span class="part-bar-wrap">
+          <span class="part-row-top">
+            <span>${seg.label}</span>
+            <span class="part-row-time">${fmt(seg.start)}–${fmt(seg.end)}</span>
+          </span>
+          <span class="part-mini-bar"><span class="part-mini-bar-fill"></span></span>
+        </span>
+        <span class="part-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 12l5 5L20 6"/></svg></span>
+      `;
+      row.addEventListener('click', ()=> goToSegment(i, true));
+      els.partsList.appendChild(row);
+    });
+    updatePartsListState();
+  }
+
+  function updatePartsListState(){
+    const rows = els.partsList.querySelectorAll('.part-row');
+    rows.forEach((row, i)=>{
+      row.classList.toggle('current', i===currentIndex);
+      const reps = (state.repsBySegment[segments[i].id]||0);
+      row.classList.toggle('done', reps>0);
+      const fill = row.querySelector('.part-mini-bar-fill');
+      if(i===currentIndex){
+        fill.style.width = segProgressPct()+'%';
+      } else {
+        fill.style.width = reps>0 ? '100%' : '0%';
+      }
+    });
+  }
+
+  function segProgressPct(){
+    const seg = segments[currentIndex];
+    if(!seg) return 0;
+    const dur = seg.end - seg.start;
+    const pos = Math.min(Math.max(audio.currentTime - seg.start,0), dur);
+    return dur>0 ? (pos/dur*100) : 0;
+  }
+
+  function goToSegment(i, autoplay){
+    if(!segments.length) return;
+    currentIndex = Math.max(0, Math.min(segments.length-1, i));
+    const seg = segments[currentIndex];
+    audio.currentTime = seg.start;
+    els.partLabel.textContent = `Part ${seg.id} of ${segments.length}`;
+    els.partTimeRange.textContent = `${fmt(seg.start)} – ${fmt(seg.end)}`;
+    renderMala();
+    updatePartsListState();
+    updateTimeDisplays();
+    if(autoplay){ play(); }
+  }
+
+  function play(){
+    audio.playbackRate = rate;
+    audio.play();
+  }
+  function pause(){ audio.pause(); }
+
+  els.playBtn.addEventListener('click', ()=>{
+    if(audio.paused) play(); else pause();
+  });
+  audio.addEventListener('play', ()=>{
+    els.playIcon.style.display='none';
+    els.pauseIcon.style.display='block';
+  });
+  audio.addEventListener('pause', ()=>{
+    els.playIcon.style.display='block';
+    els.pauseIcon.style.display='none';
+  });
+
+  els.prevBtn.addEventListener('click', ()=> goToSegment(currentIndex-1, !audio.paused));
+  els.nextBtn.addEventListener('click', ()=> goToSegment(currentIndex+1, !audio.paused));
+  els.backBtn.addEventListener('click', ()=>{
+    const seg = segments[currentIndex];
+    audio.currentTime = Math.max(seg.start, audio.currentTime-5);
+  });
+  els.fwdBtn.addEventListener('click', ()=>{
+    const seg = segments[currentIndex];
+    audio.currentTime = Math.min(seg.end-0.05, audio.currentTime+5);
+  });
+
+  els.loopToggle.addEventListener('click', ()=>{
+    looping = !looping;
+    els.loopToggle.classList.toggle('active', looping);
+    els.loopToggle.textContent = looping ? '↺ Loop part' : '↺ Loop off';
+  });
+
+  document.querySelectorAll('[data-rate]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('[data-rate]').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      rate = parseFloat(btn.dataset.rate);
+      audio.playbackRate = rate;
+    });
+  });
+
+  let lastLoopTime = 0;
+  audio.addEventListener('timeupdate', ()=>{
+    if(!segments.length) return;
+    const seg = segments[currentIndex];
+    if(audio.currentTime >= seg.end){
+      if(looping){
+        audio.currentTime = seg.start;
+        registerRep(seg);
+      } else {
+        pause();
+        audio.currentTime = seg.end;
+      }
+    }
+    updateTimeDisplays();
+  });
+
+  function updateTimeDisplays(){
+    const seg = segments[currentIndex];
+    if(!seg) return;
+    const elapsed = Math.max(0, audio.currentTime - seg.start);
+    els.bigTime.textContent = fmt(elapsed);
+    els.segRailFill.style.width = segProgressPct()+'%';
+    const overallPct = manifest ? (audio.currentTime/manifest.totalDuration*100) : 0;
+    els.railFill.style.width = overallPct+'%';
+    els.railPos.textContent = fmt(audio.currentTime);
+    const rows = els.partsList.querySelectorAll('.part-row');
+    if(rows[currentIndex]){
+      const fill = rows[currentIndex].querySelector('.part-mini-bar-fill');
+      if(fill) fill.style.width = segProgressPct()+'%';
+    }
+  }
+
+  function registerRep(seg){
+    state.repsBySegment[seg.id] = (state.repsBySegment[seg.id]||0) + 1;
+    const tk = todayKey();
+    state.history[tk] = (state.history[tk]||0) + 1;
+    saveState();
+    renderMala();
+    updatePartsListState();
+    renderHistory();
+  }
+
+  function renderMala(){
+    const seg = segments[currentIndex];
+    const reps = seg ? (state.repsBySegment[seg.id]||0) : 0;
+    els.malaCount.textContent = reps + (reps===1 ? ' rep' : ' reps');
+    const strands = Math.ceil(Math.max(reps,5)/5);
+    els.mala.innerHTML = '';
+    for(let s=0; s<strands; s++){
+      for(let b=0; b<5; b++){
+        const beadIndex = s*5+b;
+        const isGuru = b===4;
+        const filled = beadIndex < reps;
+        const bead = document.createElement('div');
+        bead.className = 'bead' + (isGuru?' guru':'') + (filled?' filled':'');
+        els.mala.appendChild(bead);
+      }
+    }
+  }
+
+  function renderHistory(){
+    const days = [];
+    for(let i=13;i>=0;i--){
+      const d = new Date();
+      d.setDate(d.getDate()-i);
+      const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      days.push({key, count: state.history[key]||0, isToday: i===0});
+    }
+    const max = Math.max(1, ...days.map(d=>d.count));
+    els.spark.innerHTML = '';
+    els.sparkLabels.innerHTML = '';
+    days.forEach(d=>{
+      const bar = document.createElement('div');
+      bar.className = 'spark-bar' + (d.count>0?' has-data':'') + (d.isToday?' today':'');
+      bar.style.height = Math.max(3, (d.count/max)*44) + 'px';
+      bar.title = d.key + ': ' + d.count + ' reps';
+      els.spark.appendChild(bar);
+    });
+    const first = document.createElement('span');
+    first.textContent = '14d ago';
+    const last = document.createElement('span');
+    last.textContent = 'today';
+    els.sparkLabels.appendChild(first);
+    els.sparkLabels.appendChild(last);
+    els.todayReps.textContent = (state.history[todayKey()]||0) + ' reps today';
+  }
+
+  document.addEventListener('keydown', (e)=>{
+    const tag = e.target.tagName;
+    if(tag === 'BUTTON' || tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if(e.code === 'Space'){ e.preventDefault(); if(audio.paused) play(); else pause(); }
+    if(e.code === 'ArrowRight'){ goToSegment(currentIndex+1, !audio.paused); }
+    if(e.code === 'ArrowLeft'){ goToSegment(currentIndex-1, !audio.paused); }
+  });
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('sw.js').catch(()=>{});
+    });
+  }
+})();
+</script>
+</body>
+</html>
