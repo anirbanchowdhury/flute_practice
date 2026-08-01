@@ -1,7 +1,7 @@
 {
-  "name": "Bhoopali Flute Practice",
+  "name": "Bhoopali Practice Builder",
   "short_name": "Bhoopali",
-  "description": "Segment practice player for Raga Bhoopali flute meditation, Pt. Hariprasad Chaurasia",
+  "description": "Mark points as you listen, then loop and practice any segment of the Bhoopali flute piece.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
