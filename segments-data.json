@@ -1,0 +1,38 @@
+{
+  "app": "bhoopali-builder",
+  "version": 2,
+  "exportedAt": "2026-08-02T00:40:04.612Z",
+  "segments": [
+    {
+      "id": 1,
+      "label": "Part 1",
+      "start": 8,
+      "end": 25
+    },
+    {
+      "id": 2,
+      "label": "Part 2",
+      "start": 25,
+      "end": 35
+    },
+    {
+      "id": 3,
+      "label": "Part 3",
+      "start": 36,
+      "end": 41
+    },
+    {
+      "id": 4,
+      "label": "Part 4",
+      "start": 41,
+      "end": 50
+    }
+  ],
+  "repsBySegment": {
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 1
+  },
+  "nextId": 5
+}
